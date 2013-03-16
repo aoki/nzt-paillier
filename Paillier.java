@@ -1,12 +1,19 @@
+/*
+ * This is Paillier algorithm.
+ * version 1.1
+ * 2009.12.01 by nakazato
+ *
+*/
+
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.Date;
 
 public class Paillier{
-    BigInteger n, c, r;
-    Random rnd;
+    BigInteger n, n2;
+    SecureRandom rnd;
     public static void main(String[] argv){
-  int round = 1000;
+  int round = 10;
   Read pkf = new Read("key.pk");
   Read skf = new Read("key.sk");
   String[] pk = pkf.readAll();
@@ -15,6 +22,7 @@ public class Paillier{
   skf.close();
 
   BigInteger n = new BigInteger(pk[0], 16);
+  BigInteger n2 = n.pow(2);;
 
   BigInteger p = new BigInteger(sk[0], 16);
   BigInteger q = new BigInteger(sk[1], 16);
@@ -29,7 +37,7 @@ public class Paillier{
   */
 
   Paillier pai = new Paillier(n);
-  Random rnd = new Random();
+  SecureRandom rnd = new SecureRandom();
   Date d1, d2, d3;
   double enc = 0, dec = 0;
   for(int i=0 ; i<round ; ++i){
@@ -38,7 +46,7 @@ public class Paillier{
       d1 = new Date();
       BigInteger c = pai.enc(m);
       d2 = new Date();
-      BigInteger m2 = pai.dec(c, d, n, l);
+      BigInteger m2 = pai.dec(c, d, n, n2);
       d3 = new Date();
       enc += d2.getTime() - d1.getTime();
       dec += d3.getTime() - d2.getTime();
@@ -57,7 +65,8 @@ public class Paillier{
 
     Paillier(BigInteger n){
   this.n = n;
-  this.rnd = new Random();
+  this.n2 = n.pow(2);
+  this.rnd = new SecureRandom();
     }
 
     public BigInteger enc(String mess){
@@ -67,17 +76,17 @@ public class Paillier{
 
     public BigInteger enc(BigInteger mess){
   //c = mess.modPow(e, n);
-  r = new BigInteger(n.bitLength(), rnd);
+  BigInteger r = new BigInteger(n.bitLength(), rnd);
   r = r.mod(n);
 
-  c = (BigInteger.ONE.add(n)).modPow(mess, n.pow(2)).multiply(r.modPow(n, n.pow(2))).mod(n.pow(2));
+  BigInteger c = (BigInteger.ONE.add(n)).modPow(mess, n2).multiply(r.modPow(n, n2)).mod(n2);
   return c;
     }
 
-    public static BigInteger dec(BigInteger c, BigInteger d, BigInteger n, BigInteger l){
+    public static BigInteger dec(BigInteger c, BigInteger d, BigInteger n, BigInteger n2){
   BigInteger mA = c.mod(n);
   BigInteger r = mA.modPow(d, n);
-  BigInteger mB = (c.multiply((r.modPow(n, n.pow(2))).modInverse(n.pow(2)))).mod(n.pow(2));
+  BigInteger mB = (c.multiply((r.modPow(n, n2)).modInverse(n2))).mod(n2);
   BigInteger m = ((mB.subtract(BigInteger.ONE)).divide(n)).mod(n);
   return m;
     }
