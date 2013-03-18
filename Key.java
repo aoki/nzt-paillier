@@ -14,7 +14,7 @@ public class Key{
 	public static void main(String[] argv){
 		if(argv.length != 1){
 			System.out.println("Usage : java MkKey bit");
-			System.out.println("¥tbit : RSA key bit length (q & p)");
+			System.out.println("\tbit : RSA key bit length (q & p)");
 		}else{
 			int bit = Integer.parseInt(argv[0]);
 			Key key = new Key(bit);
